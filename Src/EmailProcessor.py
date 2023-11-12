@@ -31,17 +31,26 @@ def print_email_details(email):
     """
 
     # Extracting email details
-    from_address = email['From']
-    to_address = email.get('To', 'N/A')
-    cc_address = email.get('CC', 'N/A')
-    bcc_address = email.get('BCC', 'N/A')
-    subject = email.get('Subject', 'N/A')
+    print('-----------------------------')
 
+    from_address = email['From']
     print(f'From: {from_address}')
-    print(f'To: {to_address}')
-    print(f'CC: {cc_address}')
-    print(f'BCC: {bcc_address}')
+
+    if email.get('To'):
+        to_address = email.get('To')
+        print(f'To: {to_address}')
+
+    if email.get('CC'):
+        cc_address = email.get('CC')
+        print(f'CC: {cc_address}')
+
+    if email.get('BCC'):
+        bcc_address = email.get('BCC')
+        print(f'BCC: {bcc_address}')
+
+    subject = email.get('Subject', 'N/A')
     print(f'Subject: {subject}')
+
 
     # Function to process and print text parts of the email
     def process_part(part):
