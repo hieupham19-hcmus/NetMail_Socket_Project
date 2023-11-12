@@ -1,49 +1,26 @@
+
 import socket
 import os
+from email import message_from_string, policy
 from email.parser import BytesParser
-from email import policy
+from EmailProcessor import print_email_with_attachment_check
 
-def receive_email(host, pop3_port, user_email, user_password):
-    try:
-        # Establish connection to the server
-        with socket.create_connection((host, pop3_port)) as pop3_client:
-            print(pop3_client.recv(1024).decode())  # Server greeting
+def save_processed_id(msg_id):
+    """Save the ID of a processed email to a file."""
+    with open('processed_ids.txt', 'a') as file:
+        file.write(f'{msg_id}\n')
 
-            # Send USER and PASS commands
-            pop3_client.sendall(f'USER {user_email}\r\n'.encode())
-            print(pop3_client.recv(1024).decode())
+def load_processed_ids():
+    PATH = os.path.join(os.getcwd(), 'processed_ids.txt')
+    if not os.path.exists(PATH):
+        return set()
+    with open(PATH, 'r') as file:
+        return set(line.strip() for line in file.readlines())
 
-            pop3_client.sendall(f'PASS {user_password}\r\n'.encode())
-            print(pop3_client.recv(1024).decode())
-
-            # Retrieve list of emails
-            pop3_client.sendall('LIST\r\n'.encode())
-            response = pop3_client.recv(1024).decode()
-            print(response)
-            
-            pop3_client.sendall('UIDL\r\n'.encode())
-            uidl_response = pop3_client.recv(1024).decode()
-            uidl_lines = uidl_response.split('\r\n')
-            
-            # Process each email
-            email_count = sum(1 for line in response.split('\r\n') if line and line[0].isdigit())
-            for i in range(email_count):
-                pop3_client.sendall(f'RETR {i + 1}\r\n'.encode())
-                email_response = pop3_client.recv(16384).decode()
-                
-                # Save email to appropriate directory
-                inbox_path = get_email_folder_address(email_response)
-                os.makedirs(inbox_path, exist_ok=True)
-                uidl = uidl_lines[i+1].split(' ')[1].split('.')[0]
-                
-                with open(os.path.join(inbox_path, f'{uidl}.eml'), 'w') as file:
-                    file.write(remove_metadata(email_response))
-
-            # Close the connection
-            pop3_client.sendall('QUIT\r\n'.encode())
-
-    except Exception as e:
-        print(f'Error with POP3 connection: {e}')
+def extract_message_id(email_str):
+    """Extract the Message ID from an email."""
+    msg = message_from_string(email_str, policy=policy.default)
+    return msg['Message-ID']
 
 def get_email_folder_address(email_str):
     """
@@ -88,3 +65,46 @@ def get_email_folder_address(email_str):
 def remove_metadata(email_str):
     """Remove metadata from email response."""
     return '\n'.join(email_str.splitlines()[1:-1])
+
+def receive_email(host, pop3_port, user_email, user_password):
+    processed_ids = load_processed_ids()
+    try:
+        with socket.create_connection((host, pop3_port)) as pop3_client:
+            response = pop3_client.recv(1024).decode()
+            #print(response)
+            pop3_client.sendall(f'USER {user_email}\r\n'.encode())
+            response = pop3_client.recv(1024).decode()
+            pop3_client.sendall(f'PASS {user_password}\r\n'.encode())
+            response = pop3_client.recv(1024).decode()
+            #print(response)
+
+            pop3_client.sendall('LIST\r\n'.encode())
+            response = pop3_client.recv(1024).decode()
+            #print(response)
+
+            pop3_client.sendall('UIDL\r\n'.encode())
+            uidl_response = pop3_client.recv(1024).decode()
+            uidl_lines = uidl_response.split('\r\n')
+
+            email_count = sum(1 for line in response.split('\r\n') if line and line[0].isdigit())
+            for i in range(email_count):
+                pop3_client.sendall(f'RETR {i + 1}\r\n'.encode())
+                email_response = pop3_client.recv(8192).decode()
+                email_response = remove_metadata(email_response)
+                #print_email_with_attachment_check(email_response)
+                msg_id = extract_message_id(email_response)
+
+                if msg_id and msg_id not in processed_ids:
+                    inbox_path = get_email_folder_address(email_response)
+                    os.makedirs(inbox_path, exist_ok=True)
+                    uidl = uidl_lines[i +1].split(' ')[1].split('.')[0]
+
+                    with open(os.path.join(inbox_path, f'{uidl}.eml'), 'w') as file:
+                        file.write(remove_metadata(email_response))
+                    save_processed_id(msg_id)
+                    processed_ids.add(msg_id)
+
+            pop3_client.sendall('QUIT\r\n'.encode())
+
+    except Exception as e:
+        print(f'Error with POP3 connection: {e}')
