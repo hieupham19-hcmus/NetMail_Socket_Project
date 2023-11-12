@@ -7,10 +7,17 @@ from email.mime.base import MIMEBase
 from email.utils import formatdate
 from email import encoders
 from email.header import decode_header
-
+import random
+import hashlib
 import datetime
 
-
+def generate_message_id(userEmail):
+    current_time = datetime.datetime.now()
+    random_str = str(random.random()).encode('utf-8')
+    unique_str = hashlib.md5(random_str + str(current_time).encode('utf-8')).hexdigest()
+    domain = userEmail.split('@')[1]
+    message_id = f'<{unique_str}@{domain}>'
+    return message_id
 def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, toEmails=None, ccEmails=None, bccEmails=None, attachmentFilePaths=None):
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,24 +36,28 @@ def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, t
             print('250 reply not received from server.')
 
         msg = MIMEMultipart()
-        msg['Message-ID'] = '<' + str(datetime.datetime.now()) + '@' + host + '>'
+        msg['Message-ID'] = generate_message_id(userEmail)
         msg['User-Agent'] = 'gg team'
-        msg['Date'] = formatdate(localtime=True)  
+        msg['Date'] = formatdate(localtime=True)
         msg['To'] = ', '.join(toEmails) if toEmails else ''
         msg['From'] = userName + ' <' + userEmail +' >'
         msg['Cc'] = ', '.join(ccEmails) if ccEmails else ''
         msg['Subject'] = userSubject
+
         body = MIMEText(userContent, 'plain')
         msg.attach(body)
 
         if attachmentFilePaths:
             for filePath in attachmentFilePaths:
+                filename = os.path.basename(filePath)  # Extracts the filename from the file path
                 with open(filePath, 'rb') as attachment:
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload(attachment.read())
                 encoders.encode_base64(part)
-                part.add_header('Content-Disposition', f"attachment; filename= {filePath}")
+                part.add_header('Content-Disposition',
+                                f"attachment; filename= \"{filename}\"")  # Use the extracted filename
                 msg.attach(part)
+
 
         fullMessage = msg.as_string().encode()
         client_socket.send(f"MAIL FROM: <{userEmail}>\r\n".encode())

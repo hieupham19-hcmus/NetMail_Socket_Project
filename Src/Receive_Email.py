@@ -4,7 +4,8 @@ import os
 from email import message_from_string, policy
 from email.parser import BytesParser
 from EmailProcessor import print_email_with_attachment_check
-
+from email.message import *
+from email import encoders
 def save_processed_id(msg_id):
     """Save the ID of a processed email to a file."""
     with open('processed_ids.txt', 'a') as file:
@@ -33,12 +34,20 @@ def get_email_folder_address(email_str):
 
     # Parse the email from string
     msg = BytesParser(policy=policy.default).parsebytes(email_str.encode())
+
     # Extract subject and content from the email
     subject = msg.get('Subject', '').lower()
+
+    content = ''
     if msg.is_multipart():
-        content = ''.join(part.get_payload(decode=True).decode() for part in msg.get_payload())
+        for part in msg.get_payload():
+            if part.get_payload(decode=True) is not None:
+                content += part.get_payload(decode=True).decode()
     else:
-        content = msg.get_payload(decode=True).decode()
+        payload = msg.get_payload(decode=True)
+        if payload is not None:
+            content = payload.decode()
+
     content = content.lower()
 
     # Filter for specific senders
@@ -100,7 +109,7 @@ def receive_email(host, pop3_port, user_email, user_password):
                     uidl = uidl_lines[i +1].split(' ')[1].split('.')[0]
 
                     with open(os.path.join(inbox_path, f'{uidl}.eml'), 'w') as file:
-                        file.write(remove_metadata(email_response))
+                        file.write(email_response)
                     save_processed_id(msg_id)
                     processed_ids.add(msg_id)
 

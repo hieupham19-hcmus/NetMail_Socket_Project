@@ -1,7 +1,7 @@
 from Receive_Email import receive_email
 from readConfig import read_config_file
 from Send_Email import send_email
-
+from EmailProcessor import *
 import os
 
 def main():
@@ -49,8 +49,9 @@ def main():
             send_email(host, smtp_port, userName, userEmail, userSubject, userBody, toEmails, ccEmails, bccEmails, attachmentFilePaths)
 
         elif choice == '2':
-            
+            attachments = receive_email(host, pop3_port, userEmail, userPassword)
             while True:
+                receive_email(host, pop3_port, userEmail, userPassword)
                 print("Đây là danh sách các folder trong mailbox của bạn:")
                 print("1. Inbox")
                 print("2. Project")
@@ -60,14 +61,41 @@ def main():
                 choice_folder = input("Bạn muốn xem email trong folder nào (Nhấn enter để thoát ra ngoài): ")
                 
                 if choice_folder == '1':
-                    receive_email(host, pop3_port, userEmail, userPassword)
+                    list_emails_in_folder('Inbox')
+                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
+                    if choice_mail == '':
+                        break
+                    else:
+                        filename, has_attachment = pick_mail_in_folder('Inbox', int(choice_mail))
+                        print(filename, has_attachment)
+                        if has_attachment:
+                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            if choice_tmp == '1':
+                                save_attachment(filename, 'D:\Socket project', attachments)
+                                print("Đã save thành công")
+                    pass
                 elif choice_folder == '2':
+                    list_emails_in_folder('Project')
                     pass
                 elif choice_folder == '3':
+                    list_emails_in_folder('Important')
                     pass
                 elif choice_folder == '4':
+                    list_emails_in_folder('Work')
+                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
+                    if choice_mail == '':
+                        break
+                    else:
+                        filename, has_attachment = pick_mail_in_folder('Work', int(choice_mail))
+
+                        if has_attachment:
+                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            if choice_tmp == '1':
+                                save_attachment(filename, 'D:\Socket project', attachments)
+                                print("Đã save thành công")
                     pass
                 elif choice_folder == '5':
+                    list_emails_in_folder('Spam')
                     pass
                 elif choice_folder == '':
                     break
@@ -78,6 +106,7 @@ def main():
             break
         else:
             print("Tùy chọn không hợp lệ. Vui lòng chọn lại.")
+
 
 if __name__ == '__main__':
     main()
