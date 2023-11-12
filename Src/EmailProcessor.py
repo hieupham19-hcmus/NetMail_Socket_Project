@@ -22,36 +22,30 @@ def remove_metadata(email_str):
     """Remove metadata from email response."""
     return '\n'.join(email_str.splitlines()[1:-1])
 
-def print_email_with_attachment_check(email_str):
+def print_email_details(email):
     """
-    Prints the details of an email and checks for attachments.
+    Prints the details of an email.
 
     Parameters:
     email_str (str): A string representation of the email.
-
-    Returns:
-    bool: True if the email has attachments, False otherwise.
     """
 
-    email = message_from_string(email_str, policy=policy.default)
     # Extracting email details
     from_address = email['From']
-    to_address = email["To"]
-    subject = email["Subject"]
+    to_address = email.get('To', 'N/A')
+    cc_address = email.get('CC', 'N/A')
+    bcc_address = email.get('BCC', 'N/A')
+    subject = email.get('Subject', 'N/A')
 
     print(f'From: {from_address}')
     print(f'To: {to_address}')
+    print(f'CC: {cc_address}')
+    print(f'BCC: {bcc_address}')
     print(f'Subject: {subject}')
 
-    has_attachments = False
-
-    # Function to print and check each part of the email
+    # Function to process and print text parts of the email
     def process_part(part):
-        nonlocal has_attachments
-        content_disposition = str(part.get("Content-Disposition", ""))
-        if "attachment" in content_disposition:
-            has_attachments = True
-        else:
+        if part.get_content_type() == 'text/plain':
             payload = part.get_payload(decode=True).decode()
             print(f'Content: {payload}')
 
@@ -63,7 +57,6 @@ def print_email_with_attachment_check(email_str):
         process_part(email)
 
     print('-----------------------------')
-    return has_attachments
 
 
 def list_emails_in_folder(folder):

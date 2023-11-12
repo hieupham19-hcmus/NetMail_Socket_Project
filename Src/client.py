@@ -67,7 +67,7 @@ def main():
                         break
                     else:
                         msg, attachments = pick_mail_in_folder('Inbox', int(choice_mail))
-
+                        print_email_details(msg)
                         if attachments:
                             choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':

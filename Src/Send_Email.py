@@ -39,8 +39,8 @@ def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, t
         msg['Message-ID'] = generate_message_id(userEmail)
         msg['User-Agent'] = 'gg team'
         msg['Date'] = formatdate(localtime=True)
-        msg['To'] = ', '.join(toEmails) if toEmails else ''
         msg['From'] = userName + ' <' + userEmail +' >'
+        msg['To'] = ', '.join(toEmails) if toEmails else ''
         msg['Cc'] = ', '.join(ccEmails) if ccEmails else ''
         msg['Subject'] = userSubject
 

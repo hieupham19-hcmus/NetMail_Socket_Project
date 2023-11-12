@@ -3,7 +3,6 @@ import socket
 import os
 from email import message_from_string, policy
 from email.parser import BytesParser
-from EmailProcessor import print_email_with_attachment_check
 from email.message import *
 from email import encoders
 def save_processed_id(msg_id):
