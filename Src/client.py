@@ -66,19 +66,41 @@ def main():
                     if choice_mail == '':
                         break
                     else:
-                        filename, has_attachment = pick_mail_in_folder('Inbox', int(choice_mail))
-                        print(filename, has_attachment)
-                        if has_attachment:
+                        msg, attachments = pick_mail_in_folder('Inbox', int(choice_mail))
+
+                        if attachments:
                             choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':
-                                save_attachment(filename, 'D:\Socket project', attachments)
+                                save_attachment(attachments, 'D:\Socket projectsws')
                                 print("Đã save thành công")
                     pass
                 elif choice_folder == '2':
                     list_emails_in_folder('Project')
+                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
+                    if choice_mail == '':
+                        break
+                    else:
+                        msg, attachments = pick_mail_in_folder('Project', int(choice_mail))
+
+                        if attachments:
+                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            if choice_tmp == '1':
+                                save_attachment(attachments, 'D:\Socket projectsws')
+                                print("Đã save thành công")
                     pass
                 elif choice_folder == '3':
                     list_emails_in_folder('Important')
+                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
+                    if choice_mail == '':
+                        break
+                    else:
+                        msg, attachments = pick_mail_in_folder('Important', int(choice_mail))
+
+                        if attachments:
+                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            if choice_tmp == '1':
+                                save_attachment(attachments, 'D:\Socket projectsws')
+                                print("Đã save thành công")
                     pass
                 elif choice_folder == '4':
                     list_emails_in_folder('Work')
@@ -86,16 +108,27 @@ def main():
                     if choice_mail == '':
                         break
                     else:
-                        filename, has_attachment = pick_mail_in_folder('Work', int(choice_mail))
+                        msg, attachments = pick_mail_in_folder('Work', int(choice_mail))
 
-                        if has_attachment:
+                        if attachments:
                             choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':
-                                save_attachment(filename, 'D:\Socket project', attachments)
+                                save_attachment(attachments, 'D:\Socket projectsws')
                                 print("Đã save thành công")
                     pass
                 elif choice_folder == '5':
                     list_emails_in_folder('Spam')
+                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
+                    if choice_mail == '':
+                        break
+                    else:
+                        msg, attachments = pick_mail_in_folder('Spam', int(choice_mail))
+
+                        if attachments:
+                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            if choice_tmp == '1':
+                                save_attachment(attachments, 'D:\Socket projectsws')
+                                print("Đã save thành công")
                     pass
                 elif choice_folder == '':
                     break

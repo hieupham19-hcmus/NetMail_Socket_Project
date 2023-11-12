@@ -91,77 +91,47 @@ def list_emails_in_folder(folder):
         except Exception as e:
             print(f"Không thể đọc email {eml_file}: {e}")
 
-def save_attachment(filenames, directory, attachments):
-    """
-    Save specified attachments to a given directory.
-
-    :param filenames: List of filenames to be saved.
-    :param directory: The directory where files will be saved.
-    :param attachments: Dictionary containing attachments with filenames as keys and content as values.
-    """
-    import os
-
-    # Check if the directory exists, if not, create it
+def save_attachment(attachments, directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    # Iterate over the filenames
-    for filename in filenames:
-        if filename in attachments:
-            file_path = os.path.join(directory, filename)
-            with open(file_path, 'wb') as file:
-                file.write(attachments[filename])
-            print(f"Attachment '{filename}' saved to '{directory}'.")
-        else:
-            print(f"Attachment '{filename}' not found in the attachments.")
+    for filename, content in attachments.items():
+        file_path = os.path.join(directory, filename)
+        with open(file_path, 'wb') as file:
+            file.write(content)
+        print(f"Attachment '{filename}' saved to '{directory}'.")
 
 def pick_mail_in_folder(folder, index):
     folder_path = os.path.join(os.getcwd(), folder)
-
     if not os.path.exists(folder_path):
         print(f"Lỗi: Thư mục '{folder}' không tồn tại.")
-        return None, False
+        return None, None
 
-    search_pattern = os.path.join(folder_path, '*.eml')
-    email_list = glob.glob(search_pattern, recursive=True)
-
-    if not email_list:
+    email_files = glob.glob(os.path.join(folder_path, '*.eml'))
+    if not email_files:
         print(f"Không có email nào trong thư mục '{folder}'.")
-        return None, False
+        return None, None
 
-    if index > len(email_list):
+    if index > len(email_files):
         print(f"Không có email nào có số thứ tự {index} trong thư mục '{folder}'.")
-        return None, False
+        return None, None
 
-    attachment_filenames = []
-    has_attachment = False
-    msg = None
     try:
-        with open(email_list[index-1], 'rb') as f:
+        with open(email_files[index - 1], 'rb') as f:
             msg = BytesParser(policy=policy.default).parse(f)
-            print(f"From: {msg.get('From')}")
-            print(f"To: {msg.get('To')}")
-            if msg.get('Cc'):
-                print(f"Cc: {msg.get('Cc')}")
-            if msg.get('Bcc'):
-                print(f"Bcc: {msg.get('Bcc')}")
-            print(f"Subject: {msg.get('Subject')}")
 
-            for part in msg.walk():
-                content_type = part.get_content_type()
-                content_disposition = str(part.get("Content-Disposition", ""))
-                if "attachment" in content_disposition:
-                    attachment_filenames.append(part.get_filename())
-                    has_attachment = True
-                elif content_type in ["text/plain", "text/html"]:
-                    # Chỉ in nội dung văn bản
-                    payload = part.get_payload(decode=True).decode()
-                    #print(f"Content: {payload}")
+        attachments = {}
+        for part in msg.walk():
+            if part.get_content_maintype() == 'multipart':
+                continue
+            if part.get('Content-Disposition') and "attachment" in part['Content-Disposition']:
+                filename = part.get_filename()
+                attachments[filename] = part.get_payload(decode=True)
+
+        return msg, attachments
 
     except Exception as e:
-        print(f"Không thể đọc email {email_list[index-1]}: {e}")
-        return None, False
-
-    return attachment_filenames, has_attachment
+        print(f"Không thể đọc email {email_files[index]}: {e}")
+        return None, None
 
 
