@@ -70,7 +70,7 @@ def main():
                         print_email_details(msg)
                         if attachments:
                             choice_tmp = input(
-                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không): ")
                             if choice_tmp == '1':
                                 path = input("Nhập đường dẫn để save file: ")
                                 save_attachment(attachments, path)
