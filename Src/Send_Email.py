@@ -11,6 +11,7 @@ import random
 import hashlib
 import datetime
 
+
 def generate_message_id(userEmail):
     current_time = datetime.datetime.now()
     random_str = str(random.random()).encode('utf-8')
@@ -18,7 +19,10 @@ def generate_message_id(userEmail):
     domain = userEmail.split('@')[1]
     message_id = f'<{unique_str}@{domain}>'
     return message_id
-def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, toEmails=None, ccEmails=None, bccEmails=None, attachmentFilePaths=None):
+
+
+def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, toEmails=None, ccEmails=None,
+               bccEmails=None, attachmentFilePaths=None):
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((host, smtp_port))
@@ -39,7 +43,7 @@ def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, t
         msg['Message-ID'] = generate_message_id(userEmail)
         msg['User-Agent'] = 'gg team'
         msg['Date'] = formatdate(localtime=True)
-        msg['From'] = userName + ' <' + userEmail +' >'
+        msg['From'] = userName + ' <' + userEmail + ' >'
         msg['To'] = ', '.join(toEmails) if toEmails else ''
         msg['Cc'] = ', '.join(ccEmails) if ccEmails else ''
         msg['Subject'] = userSubject
@@ -57,7 +61,6 @@ def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, t
                 part.add_header('Content-Disposition',
                                 f"attachment; filename= \"{filename}\"")  # Use the extracted filename
                 msg.attach(part)
-
 
         fullMessage = msg.as_string().encode()
         client_socket.send(f"MAIL FROM: <{userEmail}>\r\n".encode())

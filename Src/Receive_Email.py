@@ -1,14 +1,20 @@
-
+import base64
 import socket
 import os
 from email import message_from_string, policy
 from email.parser import BytesParser
 from email.message import *
 from email import encoders
+from filter import filter
+import email
+import quopri
+
+
 def save_processed_id(msg_id):
     """Save the ID of a processed email to a file."""
     with open('processed_ids.txt', 'a') as file:
         file.write(f'{msg_id}\n')
+
 
 def load_processed_ids():
     PATH = os.path.join(os.getcwd(), 'processed_ids.txt')
@@ -17,100 +23,99 @@ def load_processed_ids():
     with open(PATH, 'r') as file:
         return set(line.strip() for line in file.readlines())
 
+
 def extract_message_id(email_str):
     """Extract the Message ID from an email."""
     msg = message_from_string(email_str, policy=policy.default)
     return msg['Message-ID']
 
-def get_email_folder_address(email_str):
-    """
-    Classify an email into a specific folder based on its subject and content.
-    This version accepts email as a string in .msg format.
-
-    :param email_str: The email as a string in .msg format.
-    :return: The name of the folder where the email should be moved.
-    """
-
-    # Parse the email from string
-    msg = BytesParser(policy=policy.default).parsebytes(email_str.encode())
-
-    # Extract subject and content from the email
-    subject = msg.get('Subject', '').lower()
-
-    content = ''
-    if msg.is_multipart():
-        for part in msg.get_payload():
-            if part.get_payload(decode=True) is not None:
-                content += part.get_payload(decode=True).decode()
-    else:
-        payload = msg.get_payload(decode=True)
-        if payload is not None:
-            content = payload.decode()
-
-    content = content.lower()
-
-    # Filter for specific senders
-    if msg.get('From', '').lower() in ['ahihi@testing.com', 'ahuu@testing.com']:
-        return 'Project'
-
-    # Filter for specific subjects
-    important_keywords = ['urgent', 'asap']
-    if any(keyword in subject for keyword in important_keywords):
-        return 'Important'
-
-    # Filter for specific content
-    report_keywords = ['report', 'meeting']
-    if any(keyword in content for keyword in report_keywords):
-        return 'Work'
-
-    # Filter for spam indicators in subject or content
-    spam_keywords = ['virus', 'hack', 'crack']
-    if any(keyword in subject or keyword in content for keyword in spam_keywords):
-        return 'Spam'
-
-    return 'Inbox'
 
 def remove_metadata(email_str):
     """Remove metadata from email response."""
-    return '\n'.join(email_str.splitlines()[1:-1])
+    return '\n'.join(email_str.splitlines()[1:])
+
+
+def process_email(raw_email_bytes):
+    """Process email bytes, decode attachments, and return the full email content and attachments."""
+    msg = BytesParser(policy=policy.default).parsebytes(raw_email_bytes)
+
+    # Walk through the parts of the email to find attachments
+    if msg.is_multipart():
+        for part in msg.walk():
+            content_disposition = part.get("Content-Disposition", None)
+            if content_disposition and "attachment" in content_disposition:
+                # Extract the filename and the content transfer encoding
+                filename = part.get_filename()
+                cte = part.get("Content-Transfer-Encoding")
+
+                # Decode the attachment based on its Content-Transfer-Encoding
+                if cte == 'base64':
+                    binary_content = part.get_payload(decode=True)
+                elif cte == 'quoted-printable':
+                    binary_content = quopri.decodestring(part.get_payload())
+                elif cte == '7bit' or cte == '8bit' or cte == 'binary':
+                    binary_content = part.get_payload(decode=True)
+                else:
+                    # If encoding is unknown or not provided, we keep the payload as is
+                    binary_content = part.get_payload()
+
+    full_email_str = msg.as_string()
+
+    return full_email_str
+
+
+def receive_full_email(pop3_client):
+    """Receive the full content of an email from the socket as bytes, stripping POP3 response lines."""
+    email_response = []
+    while True:
+        chunk = pop3_client.recv(8192)
+        if chunk.startswith(b'+OK'):  # Handle the initial POP3 response line
+            # Find the end of the line and start collecting from the next line
+            end_of_ok_line = chunk.find(b'\r\n') + 2  # Add 2 for the length of '\r\n'
+            chunk = chunk[end_of_ok_line:]
+
+        if chunk.endswith(b'\r\n.\r\n'):  # End of email transmission in POP3
+            email_response.append(chunk[:-5])  # Remove the termination sequence
+            break
+        else:
+            email_response.append(chunk)
+    return b''.join(email_response)
+
 
 def receive_email(host, pop3_port, user_email, user_password):
-    processed_ids = load_processed_ids()
+    """Receive emails from a POP3 server."""
+    processed_IDs = load_processed_ids()
     try:
         with socket.create_connection((host, pop3_port)) as pop3_client:
-            response = pop3_client.recv(1024).decode()
-            #print(response)
+            pop3_client.recv(1024)
             pop3_client.sendall(f'USER {user_email}\r\n'.encode())
-            response = pop3_client.recv(1024).decode()
+            pop3_client.recv(1024)  # User OK
             pop3_client.sendall(f'PASS {user_password}\r\n'.encode())
-            response = pop3_client.recv(1024).decode()
-            #print(response)
+            pop3_client.recv(1024)  # Pass OK
 
             pop3_client.sendall('LIST\r\n'.encode())
             response = pop3_client.recv(1024).decode()
-            #print(response)
 
             pop3_client.sendall('UIDL\r\n'.encode())
-            uidl_response = pop3_client.recv(1024).decode()
-            uidl_lines = uidl_response.split('\r\n')
+            UIDL_Response = pop3_client.recv(1024).decode()
+            UIDL_Lines = UIDL_Response.split('\r\n')
 
             email_count = sum(1 for line in response.split('\r\n') if line and line[0].isdigit())
+
             for i in range(email_count):
                 pop3_client.sendall(f'RETR {i + 1}\r\n'.encode())
-                email_response = pop3_client.recv(8192).decode()
-                email_response = remove_metadata(email_response)
-                #print_email_with_attachment_check(email_response)
-                msg_id = extract_message_id(email_response)
+                email_response = receive_full_email(pop3_client)
+                modified_email = process_email(email_response)
+                MSG_ID = extract_message_id(modified_email)
 
-                if msg_id and msg_id not in processed_ids:
-                    inbox_path = get_email_folder_address(email_response)
+                if MSG_ID and MSG_ID not in processed_IDs:
+                    inbox_path = filter(modified_email)
                     os.makedirs(inbox_path, exist_ok=True)
-                    uidl = uidl_lines[i +1].split(' ')[1].split('.')[0]
-
-                    with open(os.path.join(inbox_path, f'{uidl}.eml'), 'w') as file:
-                        file.write(email_response)
-                    save_processed_id(msg_id)
-                    processed_ids.add(msg_id)
+                    UIDL = UIDL_Lines[i + 1].split(' ')[1].split('.')[0]
+                    with open(os.path.join(inbox_path, f'{UIDL}.eml'), 'w') as file:
+                        file.write(modified_email)
+                    save_processed_id(MSG_ID)
+                    processed_IDs.add(MSG_ID)
 
             pop3_client.sendall('QUIT\r\n'.encode())
 

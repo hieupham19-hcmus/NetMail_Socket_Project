@@ -1,4 +1,4 @@
-from Receive_Email import receive_email
+from Receive_Email import *
 from readConfig import read_config_file
 from Send_Email import send_email
 from EmailProcessor import *
@@ -49,7 +49,6 @@ def main():
             send_email(host, smtp_port, userName, userEmail, userSubject, userBody, toEmails, ccEmails, bccEmails, attachmentFilePaths)
 
         elif choice == '2':
-            attachments = receive_email(host, pop3_port, userEmail, userPassword)
             while True:
                 receive_email(host, pop3_port, userEmail, userPassword)
                 print("Đây là danh sách các folder trong mailbox của bạn:")
