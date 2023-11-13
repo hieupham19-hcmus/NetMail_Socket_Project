@@ -1,8 +1,8 @@
-from Receive_Email import *
-from readConfig import read_config_file
-from Send_Email import send_email
 from EmailProcessor import *
-import os
+from Receive_Email import *
+from Send_Email import send_email
+from readConfig import read_config_file
+
 
 def main():
     config = read_config_file('config.txt')
@@ -12,7 +12,7 @@ def main():
     host = config['MailServer']
     userEmail = config['Email']
     userName = config['Username']
-    
+
     while True:
         print("Vui lòng chọn Menu:")
         print("1. Để gửi email")
@@ -41,12 +41,13 @@ def main():
 
             attachmentFilePaths = []
             if sendAttachment == '1':
-                attachmentCount = int(input("Số lượng file muốn gửi: "))
+                attachmentCount = int(input('Số lượng file muốn gửi: '))
                 for i in range(attachmentCount):
-                    filePath = input(f"Cho biết đường dẫn file thứ {i+1}: ")
+                    filePath = input(f"Cho biết đường dẫn file thứ {i + 1}: ")
                     attachmentFilePaths.append(filePath)
 
-            send_email(host, smtp_port, userName, userEmail, userSubject, userBody, toEmails, ccEmails, bccEmails, attachmentFilePaths)
+            send_email(host, smtp_port, userName, userEmail, userSubject, userBody, toEmails, ccEmails, bccEmails,
+                       attachmentFilePaths)
 
         elif choice == '2':
             while True:
@@ -58,7 +59,7 @@ def main():
                 print("4. Work")
                 print("5. Spam")
                 choice_folder = input("Bạn muốn xem email trong folder nào (Nhấn enter để thoát ra ngoài): ")
-                
+
                 if choice_folder == '1':
                     list_emails_in_folder('Inbox')
                     choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
@@ -68,10 +69,11 @@ def main():
                         msg, attachments = pick_mail_in_folder('Inbox', int(choice_mail))
                         print_email_details(msg)
                         if attachments:
-                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            choice_tmp = input(
+                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':
-                                save_attachment(attachments, 'D:\Socket projectsws')
-                                print("Đã save thành công")
+                                path = input("Nhập đường dẫn để save file: ")
+                                save_attachment(attachments, path)
                     pass
                 elif choice_folder == '2':
                     list_emails_in_folder('Project')
@@ -80,12 +82,13 @@ def main():
                         break
                     else:
                         msg, attachments = pick_mail_in_folder('Project', int(choice_mail))
-
+                        print_email_details(msg)
                         if attachments:
-                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            choice_tmp = input(
+                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':
-                                save_attachment(attachments, 'D:\Socket projectsws')
-                                print("Đã save thành công")
+                                path = input("Nhập đường dẫn để save file: ")
+                                save_attachment(attachments, path)
                     pass
                 elif choice_folder == '3':
                     list_emails_in_folder('Important')
@@ -94,12 +97,14 @@ def main():
                         break
                     else:
                         msg, attachments = pick_mail_in_folder('Important', int(choice_mail))
-
+                        print_email_details(msg)
                         if attachments:
-                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            choice_tmp = input(
+                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':
-                                save_attachment(attachments, 'D:\Socket projectsws')
-                                print("Đã save thành công")
+                                path = input("Nhập đường dẫn để save file: ")
+                                save_attachment(attachments, path)
+
                     pass
                 elif choice_folder == '4':
                     list_emails_in_folder('Work')
@@ -108,12 +113,14 @@ def main():
                         break
                     else:
                         msg, attachments = pick_mail_in_folder('Work', int(choice_mail))
-
+                        print_email_details(msg)
                         if attachments:
-                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            choice_tmp = input(
+                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':
-                                save_attachment(attachments, 'D:\Socket projectsws')
-                                print("Đã save thành công")
+                                path = input("Nhập đường dẫn để save file: ")
+                                save_attachment(attachments, path)
+
                     pass
                 elif choice_folder == '5':
                     list_emails_in_folder('Spam')
@@ -122,17 +129,19 @@ def main():
                         break
                     else:
                         msg, attachments = pick_mail_in_folder('Spam', int(choice_mail))
-
+                        print_email_details(msg)
                         if attachments:
-                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
+                            choice_tmp = input(
+                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
                             if choice_tmp == '1':
-                                save_attachment(attachments, 'D:\Socket projectsws')
-                                print("Đã save thành công")
+                                path = input("Nhập đường dẫn để save file: ")
+                                save_attachment(attachments, path)
+
                     pass
                 elif choice_folder == '':
                     break
                 else:
-                    print("Tùy chọn không hợp lệ. Vui lòng chọn lại.") 
+                    print("Tùy chọn không hợp lệ. Vui lòng chọn lại.")
             pass
         elif choice == '3':
             break
