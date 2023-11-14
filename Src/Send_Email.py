@@ -28,14 +28,14 @@ def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, t
         client_socket.connect((host, smtp_port))
 
         recv = client_socket.recv(1024).decode()
-        print(recv)
+        #print(recv)
         if recv[:3] != '220':
             print('220 reply not received from server.')
 
         heloCommand = 'HELO\r\n'
         client_socket.send(heloCommand.encode())
         recv1 = client_socket.recv(1024).decode()
-        print(recv1)
+        #print(recv1)
         if recv1[:3] != '250':
             print('250 reply not received from server.')
 

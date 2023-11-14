@@ -10,7 +10,7 @@ Email: value
 MailServer: value
 SMTP: value
 POP3: value
-Autoload: value
+AutoLoad: value
 ```
 
 ## XML Format
@@ -22,7 +22,7 @@ Autoload: value
     <MailServer>value</MailServer>
     <SMTP>value</SMTP>
     <POP3>value</POP3>
-    <Autoload>value</Autoload>
+    <AutoLoad>value</AutoLoad>
 </config>
 ```
 ## CFG Format
@@ -33,7 +33,7 @@ Email = value
 MailServer = value
 SMTP = value
 POP3 = value
-Autoload = value
+AutoLoad = value
 ```
 
 ## JSON Format
@@ -46,7 +46,7 @@ Autoload = value
     "MailServer": "value",
     "SMTP": "value",
     "POP3": "value",
-    "Autoload": "value"
+    "AutoLoad": "value"
 }
 ```
 
@@ -60,5 +60,5 @@ Email = value
 MailServer = value
 SMTP = value
 POP3 = value
-Autoload = value
+AutoLoad = value
 ```

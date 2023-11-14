@@ -2,6 +2,25 @@ from EmailProcessor import *
 from Receive_Email import *
 from Send_Email import send_email
 from readConfig import read_config_file
+import subprocess
+import threading
+
+
+def clear_screen():
+    """Clears the terminal no matter what OS you're using"""
+    subprocess.call('cls' if os.name == 'nt' else 'clear', shell=True)
+
+
+def wait_for_enter():
+    while True:
+        response = input("Nhấn Enter để quay lại menu chính... ")
+        if response == "":
+            break
+
+
+def auto_run_function(interval, func, *args):
+    threading.Timer(interval, auto_run_function, [interval, func] + list(args)).start()
+    func(*args)
 
 
 def main():
@@ -12,8 +31,12 @@ def main():
     host = config['MailServer']
     userEmail = config['Email']
     userName = config['Username']
+    autoLoad = int(config['AutoLoad'])
+
+    auto_run_function(autoLoad, receive_email, host, pop3_port, userEmail, userPassword)
 
     while True:
+        clear_screen()
         print("Vui lòng chọn Menu:")
         print("1. Để gửi email")
         print("2. Để xem danh sách các email đã nhận")
@@ -21,6 +44,7 @@ def main():
         choice = input("Bạn chọn: ")
 
         if choice == '1':
+            clear_screen()
             print("Đây là thông tin soạn email: (nếu không điền vui lòng nhấn enter để bỏ qua)")
             to = input("To: ")
             cc = input("CC: ")
@@ -48,9 +72,10 @@ def main():
 
             send_email(host, smtp_port, userName, userEmail, userSubject, userBody, toEmails, ccEmails, bccEmails,
                        attachmentFilePaths)
-
+            wait_for_enter()
         elif choice == '2':
             while True:
+                clear_screen()
                 receive_email(host, pop3_port, userEmail, userPassword)
                 print("Đây là danh sách các folder trong mailbox của bạn:")
                 print("1. Inbox")
@@ -61,6 +86,7 @@ def main():
                 choice_folder = input("Bạn muốn xem email trong folder nào (Nhấn enter để thoát ra ngoài): ")
 
                 if choice_folder == '1':
+                    os.system("cls")
                     list_emails_in_folder('Inbox')
                     choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
                     if choice_mail == '':
@@ -74,8 +100,10 @@ def main():
                             if choice_tmp == '1':
                                 path = input("Nhập đường dẫn để save file: ")
                                 save_attachment(attachments, path)
+                        wait_for_enter()
                     pass
                 elif choice_folder == '2':
+                    clear_screen()
                     list_emails_in_folder('Project')
                     choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
                     if choice_mail == '':
@@ -89,8 +117,10 @@ def main():
                             if choice_tmp == '1':
                                 path = input("Nhập đường dẫn để save file: ")
                                 save_attachment(attachments, path)
+                        wait_for_enter()
                     pass
                 elif choice_folder == '3':
+                    clear_screen()
                     list_emails_in_folder('Important')
                     choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
                     if choice_mail == '':
@@ -104,9 +134,10 @@ def main():
                             if choice_tmp == '1':
                                 path = input("Nhập đường dẫn để save file: ")
                                 save_attachment(attachments, path)
-
+                        wait_for_enter()
                     pass
                 elif choice_folder == '4':
+                    clear_screen()
                     list_emails_in_folder('Work')
                     choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
                     if choice_mail == '':
@@ -120,9 +151,10 @@ def main():
                             if choice_tmp == '1':
                                 path = input("Nhập đường dẫn để save file: ")
                                 save_attachment(attachments, path)
-
+                        wait_for_enter()
                     pass
                 elif choice_folder == '5':
+                    clear_screen()
                     list_emails_in_folder('Spam')
                     choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
                     if choice_mail == '':
@@ -136,7 +168,7 @@ def main():
                             if choice_tmp == '1':
                                 path = input("Nhập đường dẫn để save file: ")
                                 save_attachment(attachments, path)
-
+                        wait_for_enter()
                     pass
                 elif choice_folder == '':
                     break
@@ -144,6 +176,7 @@ def main():
                     print("Tùy chọn không hợp lệ. Vui lòng chọn lại.")
             pass
         elif choice == '3':
+            clear_screen()
             break
         else:
             print("Tùy chọn không hợp lệ. Vui lòng chọn lại.")

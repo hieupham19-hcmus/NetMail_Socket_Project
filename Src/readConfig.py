@@ -2,6 +2,7 @@ import json
 import xml.etree.ElementTree as ET
 import configparser
 
+
 ## chua check .cfg va .ini
 def read_config_file(filepath):
     # Dictionary to store the configuration
@@ -66,12 +67,12 @@ def read_config_file(filepath):
         except ValueError as e:
             print(f"Error: {e}")
             return None
-        
+
     else:
         print(f"Error: Unsupported file extension: {filepath}")
 
     # Check if all required keys are present
-    required_keys = ['Username', 'Password', 'MailServer', 'SMTP', 'POP3', 'Autoload']
+    required_keys = ['Username', 'Password', 'MailServer', 'SMTP', 'POP3', 'AutoLoad']
     for key in required_keys:
         if key not in config:
             raise ValueError(f"Missing required key: {key}")
