@@ -3,7 +3,7 @@ import glob
 from email.parser import BytesParser
 from email.message import *
 import os
-
+import sqlite3
 
 def read_mail_from_file(path):
     """
@@ -67,7 +67,7 @@ def print_email_details(email):
 
     print('-----------------------------')
 
-
+"""
 def list_emails_in_folder(folder):
     folder_path = os.path.join(os.getcwd(), folder)
     
@@ -92,6 +92,50 @@ def list_emails_in_folder(folder):
                 print(f"{i}. {sender}, {subject}")
         except Exception as e:
             print(f"Không thể đọc email {eml_file}: {e}")
+"""
+
+
+def list_emails_in_folder(folder):
+    folder_path = os.path.join(os.getcwd(), folder)
+
+    if not os.path.exists(folder_path):
+        print(f"Lỗi: Thư mục '{folder}' không tồn tại.")
+        return
+
+    search_pattern = os.path.join(folder_path, '*.eml')
+    email_list = glob.glob(search_pattern, recursive=True)
+
+    if not email_list:
+        print(f"Không có email nào trong thư mục '{folder}'.")
+        return
+
+    # Connect to the database
+    conn = sqlite3.connect('database.sqlite')  # Replace with your database file
+    cursor = conn.cursor()
+
+    print(f"Đây là danh sách email trong thư mục '{folder}':")
+    for i, eml_file in enumerate(email_list, start=1):
+        try:
+            with open(eml_file, 'rb') as f:
+                msg = BytesParser(policy=policy.default).parse(f)
+                sender = msg.get('From')
+                subject = msg.get('Subject')
+                # Extract message_id from file name or another source
+                message_id = msg.get('Message-ID')  # Replace this with actual extraction logic
+
+                # Fetch the status from the database
+                cursor.execute("SELECT status FROM message_status WHERE message_id = ?", (message_id,))
+                result = cursor.fetchone()
+                status = result[0] if result else 1  # Default to 1 (unread) if not found in database
+
+                # Add (chưa đọc) for unread emails
+                unread_tag = "(chưa đọc) " if status == 0 else ""
+                print(f"{i}. {unread_tag}{sender}, {subject}")
+        except Exception as e:
+            print(f"Không thể đọc email {eml_file}: {e}")
+
+    # Close the database connection
+    conn.close()
 
 def save_attachment(attachments, directory):
     if not os.path.exists(directory):
@@ -103,6 +147,50 @@ def save_attachment(attachments, directory):
             file.write(content)
         print(f"Attachment '{filename}' saved to '{directory}'.")
 
+def pick_mail_in_folder(folder, index):
+    folder_path = os.path.join(os.getcwd(), folder)
+    if not os.path.exists(folder_path):
+        print(f"Lỗi: Thư mục '{folder}' không tồn tại.")
+        return None, None
+
+    email_files = glob.glob(os.path.join(folder_path, '*.eml'))
+    if not email_files:
+        print(f"Không có email nào trong thư mục '{folder}'.")
+        return None, None
+
+    if index > len(email_files):
+        print(f"Không có email nào có số thứ tự {index} trong thư mục '{folder}'.")
+        return None, None
+
+    try:
+        with open(email_files[index - 1], 'rb') as f:
+            msg = BytesParser(policy=policy.default).parse(f)
+
+        # Extract message_id from file name or another source
+        message_id = msg.get('Message-ID')  # Replace this with actual extraction logic
+
+        # Update the status in the database
+        conn = sqlite3.connect('database.sqlite')  # Replace with your database file
+        cursor = conn.cursor()
+        cursor.execute("UPDATE message_status SET status = 1 WHERE message_id = ?", (message_id,))
+        conn.commit()
+        conn.close()
+
+        attachments = {}
+        for part in msg.walk():
+            if part.get_content_maintype() == 'multipart':
+                continue
+            if part.get('Content-Disposition') and "attachment" in part['Content-Disposition']:
+                filename = part.get_filename()
+                attachments[filename] = part.get_payload(decode=True)
+
+        return msg, attachments
+
+    except Exception as e:
+        print(f"Không thể đọc email {email_files[index]}: {e}")
+        return None, None
+
+"""
 def pick_mail_in_folder(folder, index):
     folder_path = os.path.join(os.getcwd(), folder)
     if not os.path.exists(folder_path):
@@ -135,5 +223,7 @@ def pick_mail_in_folder(folder, index):
     except Exception as e:
         print(f"Không thể đọc email {email_files[index]}: {e}")
         return None, None
+
+"""
 
 

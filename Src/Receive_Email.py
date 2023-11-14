@@ -8,21 +8,72 @@ from email import encoders
 from filter import filter
 import email
 import quopri
+import sqlite3
 
-
+"""
 def save_processed_id(msg_id):
-    """Save the ID of a processed email to a file."""
+    # Save the ID of a processed email to a text file.
     with open('processed_ids.txt', 'a') as file:
         file.write(f'{msg_id}\n')
+"""
+
+def save_processed_id(msg_id):
+    """Save the ID of a processed email to the database with default status 0."""
+    # Database connection
+    conn = sqlite3.connect('database.sqlite')  # Replace with your database file
+    cursor = conn.cursor()
+
+    # SQL command to insert data
+    insert_command = "INSERT INTO message_status (message_id, status) VALUES (?, 0)"
+
+    try:
+        # Execute the command
+        cursor.execute(insert_command, (msg_id,))
+        # Commit the changes
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Close the connection
+        conn.close()
 
 
+"""
 def load_processed_ids():
     PATH = os.path.join(os.getcwd(), 'processed_ids.txt')
     if not os.path.exists(PATH):
         return set()
     with open(PATH, 'r') as file:
         return set(line.strip() for line in file.readlines())
+"""
 
+
+def load_processed_ids():
+    """Load processed message IDs from the database."""
+    processed_ids = set()
+
+    # Database connection
+    conn = sqlite3.connect('database.sqlite')  # Replace with your database file
+    cursor = conn.cursor()
+
+    # SQL command to select all message IDs
+    select_command = "SELECT message_id FROM message_status"
+
+    try:
+        # Execute the command and fetch all results
+        cursor.execute(select_command)
+        rows = cursor.fetchall()
+
+        # Add each message ID to the set
+        for row in rows:
+            processed_ids.add(row[0])
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Close the connection
+        conn.close()
+
+    return processed_ids
 
 def extract_message_id(email_str):
     """Extract the Message ID from an email."""
