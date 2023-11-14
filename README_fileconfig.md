@@ -25,16 +25,6 @@ AutoLoad: value
     <AutoLoad>value</AutoLoad>
 </config>
 ```
-## CFG Format
-```cfg
-Username = value
-Password = value
-Email = value
-MailServer = value
-SMTP = value
-POP3 = value
-AutoLoad = value
-```
 
 ## JSON Format
 
@@ -50,15 +40,3 @@ AutoLoad = value
 }
 ```
 
-## INI Format
-
-```ini
-[Settings]
-Username = value
-Password = value
-Email = value
-MailServer = value
-SMTP = value
-POP3 = value
-AutoLoad = value
-```
