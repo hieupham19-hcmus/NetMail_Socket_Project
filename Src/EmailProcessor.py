@@ -96,7 +96,7 @@ def list_emails_in_folder(folder):
 
 
 def list_emails_in_folder(folder):
-    folder_path = os.path.join(os.getcwd(), folder)
+    folder_path = os.path.join(os.getcwd(), 'Email\\' + folder)
 
     if not os.path.exists(folder_path):
         print(f"Lỗi: Thư mục '{folder}' không tồn tại.")
@@ -148,7 +148,7 @@ def save_attachment(attachments, directory):
         print(f"Attachment '{filename}' saved to '{directory}'.")
 
 def pick_mail_in_folder(folder, index):
-    folder_path = os.path.join(os.getcwd(), folder)
+    folder_path = os.path.join(os.getcwd(), 'Email\\' + folder)
     if not os.path.exists(folder_path):
         print(f"Lỗi: Thư mục '{folder}' không tồn tại.")
         return None, None

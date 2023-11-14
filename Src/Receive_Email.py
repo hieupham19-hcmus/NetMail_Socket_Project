@@ -10,17 +10,10 @@ import email
 import quopri
 import sqlite3
 
-"""
-def save_processed_id(msg_id):
-    # Save the ID of a processed email to a text file.
-    with open('processed_ids.txt', 'a') as file:
-        file.write(f'{msg_id}\n')
-"""
 
 def save_processed_id(msg_id):
-    """Save the ID of a processed email to the database with default status 0."""
     # Database connection
-    conn = sqlite3.connect('database.sqlite')  # Replace with your database file
+    conn = sqlite3.connect('database.sqlite')
     cursor = conn.cursor()
 
     # SQL command to insert data
@@ -38,22 +31,11 @@ def save_processed_id(msg_id):
         conn.close()
 
 
-"""
 def load_processed_ids():
-    PATH = os.path.join(os.getcwd(), 'processed_ids.txt')
-    if not os.path.exists(PATH):
-        return set()
-    with open(PATH, 'r') as file:
-        return set(line.strip() for line in file.readlines())
-"""
-
-
-def load_processed_ids():
-    """Load processed message IDs from the database."""
     processed_ids = set()
 
     # Database connection
-    conn = sqlite3.connect('database.sqlite')  # Replace with your database file
+    conn = sqlite3.connect('database.sqlite')
     cursor = conn.cursor()
 
     # SQL command to select all message IDs
@@ -74,6 +56,7 @@ def load_processed_ids():
         conn.close()
 
     return processed_ids
+
 
 def extract_message_id(email_str):
     """Extract the Message ID from an email."""
@@ -160,7 +143,8 @@ def receive_email(host, pop3_port, user_email, user_password):
                 MSG_ID = extract_message_id(modified_email)
 
                 if MSG_ID and MSG_ID not in processed_IDs:
-                    inbox_path = filter(modified_email)
+                    #D:\NetMail_Socket_Project\Src\Inbox
+                    inbox_path = 'Email\\' + filter(modified_email)
                     os.makedirs(inbox_path, exist_ok=True)
                     UIDL = UIDL_Lines[i + 1].split(' ')[1].split('.')[0]
                     with open(os.path.join(inbox_path, f'{UIDL}.eml'), 'w') as file:
