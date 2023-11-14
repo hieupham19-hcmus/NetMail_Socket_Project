@@ -24,7 +24,7 @@ def auto_run_function(interval, func, *args):
 
 
 def main():
-    config = read_config_file('config.txt')
+    config = read_config_file('config.json')
     smtp_port = int(config['SMTP'])
     pop3_port = int(config['POP3'])
     userPassword = config['Password']

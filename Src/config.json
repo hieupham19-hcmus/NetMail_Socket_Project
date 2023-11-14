@@ -1,0 +1,9 @@
+{
+    "Username": "Hieu Pham",
+    "Password": "123",
+    "Email": "hieuphamha19@gmail.com",
+    "MailServer": "127.0.0.1",
+    "SMTP": "2225",
+    "POP3": "3335",
+    "AutoLoad": "60"
+}

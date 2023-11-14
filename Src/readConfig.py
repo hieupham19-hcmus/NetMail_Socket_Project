@@ -22,24 +22,6 @@ def read_config_file(filepath):
             print(f"XML Parse Error: {e}")
             return None
 
-    elif filepath.endswith('.cfg') or filepath.endswith('.ini'):
-        # CFG or INI format
-        try:
-            parser = configparser.ConfigParser()
-            parser.read(filepath)
-            # Assuming the configuration is under a 'default' section
-            if 'default' in parser:
-                for key in parser['default']:
-                    config[key] = parser['default'][key]
-            else:
-                # Handle case where there's no 'default' section
-                for section in parser.sections():
-                    for key, value in parser.items(section):
-                        config[key] = value
-        except configparser.Error as e:
-            print(f"ConfigParser Error: {e}")
-            return None
-
     elif filepath.endswith('.json'):
         # JSON format
         try:

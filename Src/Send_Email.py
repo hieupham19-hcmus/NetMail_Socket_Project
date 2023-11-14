@@ -53,6 +53,11 @@ def send_email(host, smtp_port, userName, userEmail, userSubject, userContent, t
 
         if attachmentFilePaths:
             for filePath in attachmentFilePaths:
+                fileSize = os.path.getsize(filePath)
+                if fileSize > 3 * 1024 * 1024:  # Size in bytes (3 MB)
+                    print(f"Attachment '{filePath}' is larger than 3 MB and will not be included.")
+                    continue  # Skip this file
+
                 filename = os.path.basename(filePath)  # Extracts the filename from the file path
                 with open(filePath, 'rb') as attachment:
                     part = MIMEBase('application', 'octet-stream')
