@@ -4,6 +4,7 @@ from Send_Email import send_email
 from readConfig import read_config_file
 import subprocess
 import threading
+import sys
 
 
 def clear_screen():
@@ -176,8 +177,7 @@ def main():
                     print("Tùy chọn không hợp lệ. Vui lòng chọn lại.")
             pass
         elif choice == '3':
-            clear_screen()
-            break
+            sys.exit()
         else:
             print("Tùy chọn không hợp lệ. Vui lòng chọn lại.")
 

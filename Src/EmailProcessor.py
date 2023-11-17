@@ -5,6 +5,7 @@ from email.message import *
 import os
 import sqlite3
 
+
 def read_mail_from_file(path):
     """
     Read an email from a file.
@@ -18,9 +19,11 @@ def read_mail_from_file(path):
     with open(path, 'r') as file:
         return file.read()
 
+
 def remove_metadata(email_str):
     """Remove metadata from email response."""
     return '\n'.join(email_str.splitlines()[1:-1])
+
 
 def print_email_details(email):
     """
@@ -48,9 +51,11 @@ def print_email_details(email):
         bcc_address = email.get('BCC')
         print(f'BCC: {bcc_address}')
 
+    date = email.get('Date', 'N/A')
+    print(f'Date: {date}')
+
     subject = email.get('Subject', 'N/A')
     print(f'Subject: {subject}')
-
 
     # Function to process and print text parts of the email
     def process_part(part):
@@ -66,6 +71,7 @@ def print_email_details(email):
         process_part(email)
 
     print('-----------------------------')
+
 
 """
 def list_emails_in_folder(folder):
@@ -137,6 +143,7 @@ def list_emails_in_folder(folder):
     # Close the database connection
     conn.close()
 
+
 def save_attachment(attachments, directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -146,6 +153,7 @@ def save_attachment(attachments, directory):
         with open(file_path, 'wb') as file:
             file.write(content)
         print(f"Attachment '{filename}' saved to '{directory}'.")
+
 
 def pick_mail_in_folder(folder, index):
     folder_path = os.path.join(os.getcwd(), 'Email\\' + folder)
@@ -190,6 +198,7 @@ def pick_mail_in_folder(folder, index):
         print(f"Không thể đọc email {email_files[index]}: {e}")
         return None, None
 
+
 """
 def pick_mail_in_folder(folder, index):
     folder_path = os.path.join(os.getcwd(), folder)
@@ -225,5 +234,3 @@ def pick_mail_in_folder(folder, index):
         return None, None
 
 """
-
-
