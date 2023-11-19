@@ -1,9 +1,33 @@
 {
+  "general": {
     "Username": "Hieu Pham",
-    "Password": "123",
     "Email": "hieuphamha19@gmail.com",
+    "Password": "123",
     "MailServer": "127.0.0.1",
-    "SMTP": "2225",
-    "POP3": "3335",
-    "AutoLoad": "5"
+    "SMTP": 2225,
+    "POP3": 3335,
+    "AutoLoad": 10
+  },
+  "filters": [
+    {
+      "applyTo": ["From"],
+      "keywords": ["ahihi@testing.com", "ahuu@testing.com"],
+      "folder": "Project"
+    },
+    {
+      "applyTo": ["Subject"],
+      "keywords": ["urgent", "ASAP", "hieu"],
+      "folder": "Important"
+    },
+    {
+      "applyTo": ["Content"],
+      "keywords": ["report", "meeting"],
+      "folder": "Work"
+    },
+    {
+      "applyTo": ["Subject", "Content"],
+      "keywords": ["virus", "hack", "crack"],
+      "folder": "Spam"
+    }
+  ]
 }

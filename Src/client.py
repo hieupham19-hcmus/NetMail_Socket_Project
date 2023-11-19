@@ -23,18 +23,26 @@ def auto_run_function(interval, func, *args):
     threading.Timer(interval, auto_run_function, [interval, func] + list(args)).start()
     func(*args)
 
+def get_existing_mail_folders():
+    mailbox_path = os.path.join(os.getcwd(), 'Email')
+    if not os.path.exists(mailbox_path):
+        print("Mailbox directory not found.")
+        return []
+
+    folders = next(os.walk(mailbox_path))[1]  # List of folder names in the mailbox directory
+    return folders
 
 def main():
     config = read_config_file('config.json')
-    smtp_port = int(config['SMTP'])
-    pop3_port = int(config['POP3'])
-    userPassword = config['Password']
-    host = config['MailServer']
-    userEmail = config['Email']
-    userName = config['Username']
-    autoLoad = int(config['AutoLoad'])
+    smtp_port = int(config['general']['SMTP'])
+    pop3_port = int(config['general']['POP3'])
+    userPassword = config['general']['Password']
+    host = config['general']['MailServer']
+    userEmail = config['general']['Email']
+    userName = config['general']['Username']
+    autoLoad = int(config['general']['AutoLoad'])
 
-    auto_run_function(autoLoad, receive_email, host, pop3_port, userEmail, userPassword)
+    auto_run_function(autoLoad, receive_email, host, pop3_port, userEmail, userPassword, config)
 
     while True:
         clear_screen()
@@ -77,105 +85,51 @@ def main():
         elif choice == '2':
             while True:
                 clear_screen()
-                receive_email(host, pop3_port, userEmail, userPassword)
+                receive_email(host, pop3_port, userEmail, userPassword, config)
+                existing_folders = get_existing_mail_folders()
+                if not existing_folders:
+                    print("Không có thư mục nào trong mailbox.")
+                    wait_for_enter()
+                    break
+
                 print("Đây là danh sách các folder trong mailbox của bạn:")
-                print("1. Inbox")
-                print("2. Project")
-                print("3. Important")
-                print("4. Work")
-                print("5. Spam")
+                for idx, folder in enumerate(existing_folders, start=1):
+                    print(f"{idx}. {folder}")
+
                 choice_folder = input("Bạn muốn xem email trong folder nào (Nhấn enter để thoát ra ngoài): ")
 
-                if choice_folder == '1':
-                    os.system("cls")
-                    list_emails_in_folder('Inbox')
-                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
-                    if choice_mail == '':
-                        break
-                    else:
-                        msg, attachments = pick_mail_in_folder('Inbox', int(choice_mail))
-                        print_email_details(msg)
-                        if attachments:
-                            choice_tmp = input(
-                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không): ")
-                            if choice_tmp == '1':
-                                path = input("Nhập đường dẫn để save file: ")
-                                save_attachment(attachments, path)
-                        wait_for_enter()
-                    pass
-                elif choice_folder == '2':
-                    clear_screen()
-                    list_emails_in_folder('Project')
-                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
-                    if choice_mail == '':
-                        break
-                    else:
-                        msg, attachments = pick_mail_in_folder('Project', int(choice_mail))
-                        print_email_details(msg)
-                        if attachments:
-                            choice_tmp = input(
-                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
-                            if choice_tmp == '1':
-                                path = input("Nhập đường dẫn để save file: ")
-                                save_attachment(attachments, path)
-                        wait_for_enter()
-                    pass
-                elif choice_folder == '3':
-                    clear_screen()
-                    list_emails_in_folder('Important')
-                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
-                    if choice_mail == '':
-                        break
-                    else:
-                        msg, attachments = pick_mail_in_folder('Important', int(choice_mail))
-                        print_email_details(msg)
-                        if attachments:
-                            choice_tmp = input(
-                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
-                            if choice_tmp == '1':
-                                path = input("Nhập đường dẫn để save file: ")
-                                save_attachment(attachments, path)
-                        wait_for_enter()
-                    pass
-                elif choice_folder == '4':
-                    clear_screen()
-                    list_emails_in_folder('Work')
-                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
-                    if choice_mail == '':
-                        break
-                    else:
-                        msg, attachments = pick_mail_in_folder('Work', int(choice_mail))
-                        print_email_details(msg)
-                        if attachments:
-                            choice_tmp = input(
-                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
-                            if choice_tmp == '1':
-                                path = input("Nhập đường dẫn để save file: ")
-                                save_attachment(attachments, path)
-                        wait_for_enter()
-                    pass
-                elif choice_folder == '5':
-                    clear_screen()
-                    list_emails_in_folder('Spam')
-                    choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
-                    if choice_mail == '':
-                        break
-                    else:
-                        msg, attachments = pick_mail_in_folder('Spam', int(choice_mail))
-                        print_email_details(msg)
-                        if attachments:
-                            choice_tmp = input(
-                                "Trong email này có attached file, bạn có muốn save không (1. có, 2. không):")
-                            if choice_tmp == '1':
-                                path = input("Nhập đường dẫn để save file: ")
-                                save_attachment(attachments, path)
-                        wait_for_enter()
-                    pass
-                elif choice_folder == '':
+                if choice_folder == '':
                     break
-                else:
+                try:
+                    selected_folder_index = int(choice_folder) - 1
+                    selected_folder = existing_folders[selected_folder_index]
+                except (IndexError, ValueError):
                     print("Tùy chọn không hợp lệ. Vui lòng chọn lại.")
-            pass
+                    continue
+
+                clear_screen()
+                list_emails_in_folder(selected_folder)
+                choice_mail = input("Bạn muốn xem email nào (Nhấn enter để thoát ra ngoài): ")
+
+                if choice_mail == '':
+                    continue
+                else:
+                    try:
+                        selected_email = int(choice_mail)
+                        msg, attachments = pick_mail_in_folder(selected_folder, selected_email)
+                        os.system("cls")
+                        print_email_details(msg)
+                        if attachments:
+                            choice_tmp = input("Trong email này có attached file, bạn có muốn save không (1. có, "
+                                               "2. không): ")
+                            if choice_tmp == '1':
+                                path = input("Nhập đường dẫn để save file: ")
+                                save_attachment(attachments, path)
+                        wait_for_enter()
+                    except ValueError:
+                        print("Tùy chọn không hợp lệ. Vui lòng nhập một số.")
+                    except Exception as e:
+                        print(f"Có lỗi xảy ra: {e}")
         elif choice == '3':
             sys.exit()
         else:

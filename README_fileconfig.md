@@ -15,28 +15,87 @@ AutoLoad: value
 
 ## XML Format
 ```xml
-<config>
-    <Username>value</Username>
-    <Password>value</Password>
-    <Email>value</Email>
-    <MailServer>value</MailServer>
-    <SMTP>value</SMTP>
-    <POP3>value</POP3>
-    <AutoLoad>value</AutoLoad>
-</config>
+<Configuration>
+    <General>
+        <Username>[USERNAME]</Username>
+        <Email>[EMAIL_ADDRESS]</Email>
+        <Password>[PASSWORD]</Password>
+        <MailServer>[MAIL_SERVER_IP]</MailServer>
+        <SMTP>[SMTP_PORT]</SMTP>
+        <POP3>[POP3_PORT]</POP3>
+        <AutoLoad>[AUTOLOAD_INTERVAL]</AutoLoad>
+    </General>
+    <Filters>
+        <Filter>
+            <ApplyTo>From</ApplyTo>
+            <Keywords>
+                <Keyword>[EMAIL_KEYWORDS_FOR_FROM_FILTER]</Keyword>
+            </Keywords>
+            <Folder>[FOLDER_NAME_FOR_FROM_FILTER]</Folder>
+        </Filter>
+        <Filter>
+            <ApplyTo>Subject</ApplyTo>
+            <Keywords>
+                <Keyword>[KEYWORDS_FOR_SUBJECT_FILTER]</Keyword>
+            </Keywords>
+            <Folder>[FOLDER_NAME_FOR_SUBJECT_FILTER]</Folder>
+        </Filter>
+        <Filter>
+            <ApplyTo>Content</ApplyTo>
+            <Keywords>
+                <Keyword>[KEYWORDS_FOR_CONTENT_FILTER]</Keyword>
+            </Keywords>
+            <Folder>[FOLDER_NAME_FOR_CONTENT_FILTER]</Folder>
+        </Filter>
+        <Filter>
+            <ApplyTo>
+                <Type>Subject</Type>
+                <Type>Content</Type>
+            </ApplyTo>
+            <Keywords>
+                <Keyword>[KEYWORDS_FOR_SUBJECT_AND_CONTENT_FILTER]</Keyword>
+            </Keywords>
+            <Folder>[FOLDER_NAME_FOR_SUBJECT_AND_CONTENT_FILTER]</Folder>
+        </Filter>
+    </Filters>
+</Configuration>
 ```
 
 ## JSON Format
 
 ```json
 {
-    "Username": "value",
-    "Password": "value",
-    "Email": "value",
-    "MailServer": "value",
-    "SMTP": "value",
-    "POP3": "value",
-    "AutoLoad": "value"
+  "general": {
+    "Username": "<USERNAME>",
+    "Email": "<EMAIL_ADDRESS>",
+    "Password": "<PASSWORD>",
+    "MailServer": "<MAIL_SERVER_IP>",
+    "SMTP": "<SMTP_PORT>",
+    "POP3": "<POP3_PORT>",
+    "AutoLoad": "<AUTOLOAD_INTERVAL>"
+  },
+  "filters": [
+    {
+      "applyTo": ["From"],
+      "keywords": ["<EMAIL_KEYWORDS_FOR_FROM_FILTER>"],
+      "folder": "<FOLDER_NAME_FOR_FROM_FILTER>"
+    },
+    {
+      "applyTo": ["Subject"],
+      "keywords": ["<KEYWORDS_FOR_SUBJECT_FILTER>"],
+      "folder": "<FOLDER_NAME_FOR_SUBJECT_FILTER>"
+    },
+    {
+      "applyTo": ["Content"],
+      "keywords": ["<KEYWORDS_FOR_CONTENT_FILTER>"],
+      "folder": "<FOLDER_NAME_FOR_CONTENT_FILTER>"
+    },
+    {
+      "applyTo": ["Subject", "Content"],
+      "keywords": ["<KEYWORDS_FOR_SUBJECT_AND_CONTENT_FILTER>"],
+      "folder": "<FOLDER_NAME_FOR_SUBJECT_AND_CONTENT_FILTER>"
+    }
+  ]
 }
 ```
 

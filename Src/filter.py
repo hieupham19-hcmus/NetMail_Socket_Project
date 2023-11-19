@@ -3,49 +3,34 @@ from email.parser import BytesParser
 from email.message import *
 
 
-def filter(email):
-    sender_keywords = ['ahihi@testing.com', 'ahuu@testing.com']
-    important_keywords = ['urgent', 'asap']
-    report_keywords = ['report', 'meeting']
-    spam_keywords = ['virus', 'hack', 'crack']
-
-    # Check if email is an instance of EmailMessage
+def filter(email, config):
     if not isinstance(email, EmailMessage):
-        msg = BytesParser(policy=policy.default).parsebytes(email.encode())
-    else:
-        msg = email
+        email = BytesParser(policy=policy.default).parsebytes(email.encode())
 
-    subject = msg.get('Subject', '').lower()
+    subject = email.get('Subject', '').lower()
+    from_field = email.get('From', '').lower()
 
     content = ''
-    if msg.is_multipart():
-        for part in msg.get_payload():
-            # Check if part is a text type before decoding
+    if email.is_multipart():
+        for part in email.get_payload():
             if part.get_content_type() in ['text/plain', 'text/html']:
                 payload = part.get_payload(decode=True)
                 if payload is not None:
-                    content += payload.decode()
+                    content += payload.decode().lower()
     else:
-        payload = msg.get_payload(decode=True)
+        payload = email.get_payload(decode=True)
         if payload is not None:
-            content = payload.decode()
+            content = payload.decode().lower()
 
-    content = content.lower()
+    for filter in config['filters']:
+        keywords = [kw.lower() for kw in filter['keywords']]
+        applies_to = filter.get('applyTo', [])
 
-    # Filter for specific senders
-    if msg.get('From', '').lower() in sender_keywords:
-        return 'Project'
-
-    # Filter for specific subjects
-    if any(keyword in subject for keyword in important_keywords):
-        return 'Important'
-
-    # Filter for specific content
-    if any(keyword in content for keyword in report_keywords):
-        return 'Work'
-
-    # Filter for spam indicators in subject or content
-    if any(keyword in subject or keyword in content for keyword in spam_keywords):
-        return 'Spam'
+        if 'From' in applies_to and any(kw in from_field for kw in keywords):
+            return filter['folder']
+        if 'Subject' in applies_to and any(kw in subject for kw in keywords):
+            return filter['folder']
+        if 'Content' in applies_to and any(kw in content for kw in keywords):
+            return filter['folder']
 
     return 'Inbox'

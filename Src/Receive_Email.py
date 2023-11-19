@@ -116,7 +116,7 @@ def receive_full_email(pop3_client):
     return b''.join(email_response)
 
 
-def receive_email(host, pop3_port, user_email, user_password):
+def receive_email(host, pop3_port, user_email, user_password, config):
     """Receive emails from a POP3 server."""
     processed_IDs = load_processed_ids()
     try:
@@ -144,7 +144,7 @@ def receive_email(host, pop3_port, user_email, user_password):
 
                 if MSG_ID and MSG_ID not in processed_IDs:
                     #D:\NetMail_Socket_Project\Src\Inbox
-                    inbox_path = 'Email\\' + filter(modified_email)
+                    inbox_path = 'Email\\' + filter(modified_email, config)
                     os.makedirs(inbox_path, exist_ok=True)
                     UIDL = UIDL_Lines[i + 1].split(' ')[1].split('.')[0]
                     with open(os.path.join(inbox_path, f'{UIDL}.eml'), 'w') as file:
