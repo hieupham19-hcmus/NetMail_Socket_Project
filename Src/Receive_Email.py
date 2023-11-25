@@ -143,7 +143,6 @@ def receive_email(host, pop3_port, user_email, user_password, config):
                 MSG_ID = extract_message_id(modified_email)
 
                 if MSG_ID and MSG_ID not in processed_IDs:
-                    #D:\NetMail_Socket_Project\Src\Inbox
                     inbox_path = 'Email\\' + filter(modified_email, config)
                     os.makedirs(inbox_path, exist_ok=True)
                     UIDL = UIDL_Lines[i + 1].split(' ')[1].split('.')[0]
