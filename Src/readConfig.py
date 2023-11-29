@@ -47,20 +47,39 @@ def read_config_file(filepath):
             return None
 
     elif filepath.endswith('.txt'):
-        # TXT format (or default)
         try:
             with open(filepath, 'r') as file:
-                lines = file.readlines()
-                for line in lines:
-                    if ':' in line:
+                section = None
+                filter_section = None
+                for line in file:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    if line.endswith(':'):
+                        section = line[:-1].lower()
+                        if section == 'filters':
+                            config[section] = []
+                        else:
+                            config[section] = {}
+                    elif ':' in line and section:
                         key, value = line.split(':', 1)
-                        config[key.strip()] = value.strip()
-        except FileNotFoundError:
-            print(f"Error: The file {filepath} was not found.")
-            return None
-        except ValueError as e:
-            print(f"Error: {e}")
-            return None
+                        key, value = key.strip(), value.strip()
+                        if section == 'filters':
+                            if key == 'Filter':
+                                if filter_section:
+                                    config[section].append(filter_section)
+                                filter_section = {}
+                            elif filter_section is not None:
+                                if key == 'Keywords':
+                                    filter_section['keywords'] = []
+                                elif key == 'Keyword':
+                                    filter_section['keywords'].append(value)
+                                else:
+                                    filter_section[key.lower()] = value
+                        else:
+                            config[section][key] = value
+                if filter_section:
+                    config['filters'].append(filter_section)
 
     else:
         print(f"Error: Unsupported file extension: {filepath}")
