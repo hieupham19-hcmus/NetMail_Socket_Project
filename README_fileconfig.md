@@ -4,13 +4,43 @@
 Config fix to use our application
 ## TXT Format
 ```txt
-Username: value
-Password: value
-Email: value
-MailServer: value
-SMTP: value
-POP3: value
-AutoLoad: value
+Configuration:
+    General:
+        Username: [USERNAME]
+        Email: [EMAIL_ADDRESS]
+        Password: [PASSWORD]
+        MailServer: [MAIL_SERVER_IP]
+        SMTP: [SMTP_PORT]
+        POP3: [POP3_PORT]
+        AutoLoad: [AUTOLOAD_INTERVAL]
+
+    Filters:
+        Filter:
+            ApplyTo: From
+            Keywords:
+                - Keyword: [EMAIL_KEYWORDS_FOR_FROM_FILTER]
+            Folder: [FOLDER_NAME_FOR_FROM_FILTER]
+
+        Filter:
+            ApplyTo: Subject
+            Keywords:
+                - Keyword: [KEYWORDS_FOR_SUBJECT_FILTER]
+            Folder: [FOLDER_NAME_FOR_SUBJECT_FILTER]
+
+        Filter:
+            ApplyTo: Content
+            Keywords:
+                - Keyword: [KEYWORDS_FOR_CONTENT_FILTER]
+            Folder: [FOLDER_NAME_FOR_CONTENT_FILTER]
+
+        Filter:
+            ApplyTo:
+                - Type: Subject
+                - Type: Content
+            Keywords:
+                - Keyword: [KEYWORDS_FOR_SUBJECT_AND_CONTENT_FILTER]
+            Folder: [FOLDER_NAME_FOR_SUBJECT_AND_CONTENT_FILTER]
+
 ```
 
 ## XML Format
