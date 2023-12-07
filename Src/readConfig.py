@@ -6,21 +6,14 @@ def read_config_file(filepath):
     # Dictionary to store the configuration
     config = {}
 
-    if filepath.endswith('.json'):
-        # JSON format
-        try:
+    try:
+        if filepath.endswith('.json'):
+            # JSON format
             with open(filepath, 'r') as file:
                 config = json.load(file)
-        except json.JSONDecodeError as e:
-            print(f"JSON Decode Error: {e}")
-            return None
-        except FileNotFoundError:
-            print(f"Error: The file {filepath} was not found.")
-            return None
 
-    elif filepath.endswith('.xml'):
-        # XML format
-        try:
+        elif filepath.endswith('.xml'):
+            # XML format
             tree = ET.parse(filepath)
             root = tree.getroot()
 
@@ -39,15 +32,8 @@ def read_config_file(filepath):
                             else:
                                 filter_dict[element.tag.lower()] = element.text
                         config['filters'].append(filter_dict)
-        except ET.ParseError as e:
-            print(f"XML Parse Error: {e}")
-            return None
-        except FileNotFoundError:
-            print(f"Error: The file {filepath} was not found.")
-            return None
 
-    elif filepath.endswith('.txt'):
-        try:
+        elif filepath.endswith('.txt'):
             with open(filepath, 'r') as file:
                 section = None
                 filter_section = None
@@ -80,24 +66,32 @@ def read_config_file(filepath):
                             config[section][key] = value
                 if filter_section:
                     config['filters'].append(filter_section)
-        except FileNotFoundError:
-            print(f"Error: The file {filepath} was not found.")
-            return None
-        except ValueError as e:
-            print(f"Error: {e}")
-            return None
-    else:
-        print(f"Error: Unsupported file extension: {filepath}")
-        return None
 
-    # Validation for all file types
-    required_keys = ['Username', 'Password', 'MailServer', 'SMTP', 'POP3', 'AutoLoad']
-    if 'general' in config:
-        for key in required_keys:
-            if key not in config['general']:
-                raise ValueError(f"Missing required key in 'general' section: {key}")
-    else:
-        print("Error: 'general' section missing in the configuration file.")
+        else:
+            print(f"Error: Unsupported file extension: {filepath}")
+            return None
+
+        # Validation for all file types
+        required_keys = ['Username', 'Password', 'MailServer', 'SMTP', 'POP3', 'AutoLoad']
+        if 'general' in config:
+            for key in required_keys:
+                if key not in config['general']:
+                    raise ValueError(f"Missing required key in 'general' section: {key}")
+        else:
+            print("Error: 'general' section missing in the configuration file.")
+            return None
+
+    except json.JSONDecodeError as e:
+        print(f"JSON Decode Error: {e}")
+        return None
+    except ET.ParseError as e:
+        print(f"XML Parse Error: {e}")
+        return None
+    except FileNotFoundError:
+        print(f"Error: The file {filepath} was not found.")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
         return None
 
     return config
