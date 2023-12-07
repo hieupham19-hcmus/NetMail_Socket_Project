@@ -80,7 +80,12 @@ def read_config_file(filepath):
                             config[section][key] = value
                 if filter_section:
                     config['filters'].append(filter_section)
-
+        except FileNotFoundError:
+            print(f"Error: The file {filepath} was not found.")
+            return None
+        except ValueError as e:
+            print(f"Error: {e}")
+            return None
     else:
         print(f"Error: Unsupported file extension: {filepath}")
         return None
